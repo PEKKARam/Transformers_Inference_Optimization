@@ -1,9 +1,10 @@
 import time
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from utils import log_info, measure_time  # 引入日志记录和时间测量功能
 
 # 加载预训练模型和分词器
-model_name = "gpt2"  # 你可以替换为其他模型，比如 "bert-base-uncased" 或 "roberta-base"
+model_name = "bert-base-uncased"  # 你可以替换为其他模型，比如 "bert-base-uncased" 或 "roberta-base"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
@@ -29,15 +30,20 @@ inputs = {key: value.to(device) for key, value in inputs.items()}
 for _ in range(5):
     _ = model(**inputs)
 
+@measure_time
+def run_inference(texts):
+    """运行推理并记录时间"""
+    for text in texts:
+        inputs = tokenizer(text, return_tensors="pt")
+        inputs = {key: value.to(device) for key, value in inputs.items()}
+        with torch.no_grad():
+            _ = model(**inputs)
+
 # 测量推理时间
 num_runs = len(texts)  # 测试运行次数等于文本数量
 start_time = time.time()
 
-for text in texts:
-    inputs = tokenizer(text, return_tensors="pt")
-    inputs = {key: value.to(device) for key, value in inputs.items()}
-    with torch.no_grad():
-        outputs = model(**inputs)
+run_inference(texts)
 
 end_time = time.time()
 
@@ -45,8 +51,8 @@ end_time = time.time()
 total_time = end_time - start_time
 average_time = total_time / num_runs
 
-print(f"模型: {model_name}")
-print(f"设备: {device}")
-print(f"推理次数: {num_runs}")
-print(f"总推理时间: {total_time:.4f} 秒")
-print(f"平均推理时间: {average_time:.4f} 秒/次")
+log_info(f"模型: {model_name}")
+log_info(f"设备: {device}")
+log_info(f"推理次数: {num_runs}")
+log_info(f"总推理时间: {total_time:.4f} 秒")
+log_info(f"平均推理时间: {average_time:.4f} 秒/次")

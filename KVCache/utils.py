@@ -15,6 +15,12 @@ logging.basicConfig(
     encoding="utf-8"          # 日志文件编码
 )
 
+# 添加控制台输出
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+logging.getLogger().addHandler(console_handler)
+
 def measure_time(func):
     """装饰器，用于测量函数运行时间"""
     def wrapper(*args, **kwargs):
