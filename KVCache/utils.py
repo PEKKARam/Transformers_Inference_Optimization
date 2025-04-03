@@ -6,7 +6,7 @@ log_dir = "logs"
 os.makedirs(log_dir, exist_ok=True)  # 创建日志目录
 
 # 配置日志记录
-log_file = os.path.join(log_dir, "BaselineInference.log")
+log_file = os.path.join(log_dir, "KVCacheInference.log")
 logging.basicConfig(
     filename=log_file,  # 日志文件名
     filemode="a",              # 追加模式写入日志
