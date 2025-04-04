@@ -35,3 +35,7 @@ def measure_time(func):
 def log_info(message):
     """记录信息日志"""
     logging.info(message)
+
+def log_cache_operation(operation, key, device):
+    """记录缓存操作日志"""
+    log_info(f"{operation} 缓存: {key} 到设备: {device}")
