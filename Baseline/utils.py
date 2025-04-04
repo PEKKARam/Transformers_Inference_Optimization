@@ -35,3 +35,9 @@ def measure_time(func):
 def log_info(message):
     """记录信息日志"""
     logging.info(message)
+
+def log_inference_stats(total_time, num_samples):
+    """记录推理统计信息"""
+    average_time = total_time / num_samples
+    logging.info(f"总推理时间: {total_time:.4f} 秒")
+    logging.info(f"平均推理时间: {average_time:.4f} 秒/次")

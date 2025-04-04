@@ -31,15 +31,37 @@ def run_inference():
     # 测量推理时间
     start_time = time.time()
     past_key_values = None  # 初始化 KV Cache
+    position_ids_offset = 0  # 初始化 position_ids 偏移量
     for text in texts:
         inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=max_length)  # 确保输入不超长
         inputs = {key: value.to(device) for key, value in inputs.items()}
-        with torch.no_grad():
-            if use_kv_cache:
-                outputs = model(**inputs, past_key_values=past_key_values, use_cache=True)
-                past_key_values = outputs.past_key_values  # 更新 KV Cache
-            else:
-                outputs = model(**inputs)
+        input_ids = inputs["input_ids"]
+
+        # 确保 input_ids 在合法范围内
+        input_ids = torch.clamp(input_ids, min=0, max=50256)
+
+        # 按 token 逐步推理
+        for i in range(input_ids.size(1)):  # 遍历每个 token
+            current_input_ids = input_ids[:, i].unsqueeze(1)  # 当前 token
+
+            # 确保 position_ids 在合法范围内
+            current_position_ids = torch.tensor(
+                [[position_ids_offset]], device=device
+            )
+            current_position_ids = torch.clamp(current_position_ids, min=0, max=max_length - 1)
+            position_ids_offset += 1  # 更新偏移量
+
+            with torch.no_grad():
+                if use_kv_cache:
+                    outputs = model(
+                        input_ids=current_input_ids,
+                        past_key_values=past_key_values,
+                        use_cache=True,
+                        position_ids=current_position_ids  # 显式传递 position_ids
+                    )
+                    past_key_values = outputs.past_key_values  # 更新 KV Cache
+                else:
+                    outputs = model(input_ids=current_input_ids)
     end_time = time.time()
 
     # 输出推理时间
