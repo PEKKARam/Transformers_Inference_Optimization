@@ -32,9 +32,11 @@ def measure_time(func):
         return result
     return wrapper
 
-def log_info(message):
-    """记录信息日志"""
-    logging.info(message)
+def log_info(message, log_every_n=1, counter=[0]):
+    """记录信息日志，支持控制日志输出频率"""
+    counter[0] += 1
+    if counter[0] % log_every_n == 0:
+        logging.info(message)
 
 def log_inference_stats(total_time, num_samples):
     """记录推理统计信息"""
