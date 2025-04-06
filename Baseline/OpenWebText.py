@@ -16,7 +16,7 @@ atexit.register(finalize_s3)  # 确保程序退出时清理 S3 资源
 s3 = S3FileSystem(region="us-west-2")
 
 # 加载 WikiText-2 数据集
-dataset = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")
+dataset = load_dataset("openwebtext", split="test", trust_remote_code=True, cache_dir="D:/Graduate_ Design/Transformers_Inference_Optimization/cache")
 texts = dataset["text"][:100]  # 选取前100条测试样本
 
 # 初始化模型与分词器（在 CPU 上测试）
@@ -46,3 +46,4 @@ for text in tqdm(texts, desc="推理进度", unit="样本"):
 avg_time = sum(times) / len(times)
 print(f"平均推理时间：{avg_time:.4f} 秒")
 log_inference_stats(sum(times), len(times))
+                    
