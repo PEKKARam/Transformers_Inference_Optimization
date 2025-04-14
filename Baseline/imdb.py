@@ -16,9 +16,9 @@ atexit.register(finalize_s3)  # 确保程序退出时清理 S3 资源
 # 示例：使用 S3 文件系统
 s3 = S3FileSystem(region="us-west-2")
 
-# 加载 ptb 数据集
-dataset = load_dataset("ptb_text_only", split="test")
-texts = dataset["sentence"][:100]  # 选取前100条测试样本
+# 加载 IMDb 数据集
+dataset = load_dataset("imdb", split="test")
+texts = dataset["text"][:min(100, len(dataset["text"]))]  # 动态调整切片范围
 
 # 初始化模型与分词器（在 CPU 上测试）
 model = GPT2LMHeadModel.from_pretrained(model_name).to(device)
@@ -28,13 +28,24 @@ model.eval()
 
 # 生成推理时间统计
 def measure_inference_time(text, max_new_tokens=50):
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=max_length)
+    inputs = tokenizer(
+        text,
+        return_tensors="pt",
+        truncation=True,  # 启用截断
+        padding=True,
+        max_length=1024  # 限制输入长度为 1024
+    )
     input_ids = inputs.input_ids.to(device)
     attention_mask = inputs.attention_mask.to(device)
     
     # 使用 KV Cache 进行推理
     start_time = time.time()
-    _ = model.generate(input_ids, max_new_tokens=max_new_tokens, pad_token_id=tokenizer.eos_token_id, attention_mask=attention_mask)
+    _ = model.generate(
+        input_ids,
+        max_new_tokens=max_new_tokens,
+        pad_token_id=tokenizer.eos_token_id,
+        attention_mask=attention_mask
+    )
     return time.time() - start_time
 
 # 添加进度条显示推理进度
@@ -44,7 +55,7 @@ for text in tqdm(texts, desc="推理进度", unit="样本"):
         inference_time = measure_inference_time(text)
         times.append(inference_time)
 
-print(f"设备: {device}, 模型: {model_name}, 数据集: PTB")
+print(f"设备: {device}, 模型: {model_name}, 数据集: IMDb")
 avg_time = sum(times) / len(times)
 print(f"平均推理时间：{avg_time:.4f} 秒")
 log_inference_stats(sum(times), len(times))

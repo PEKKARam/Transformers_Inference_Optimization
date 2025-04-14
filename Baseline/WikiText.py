@@ -8,7 +8,6 @@ from tqdm import tqdm
 from utils import log_info, log_inference_stats  # 引入日志记录函数
 from config import model_name, device, max_length
 
-log_inference_stats(device, model_name, max_length)  # 记录模型和设备信息
 
 # 初始化 S3
 initialize_s3()
@@ -45,6 +44,7 @@ for text in tqdm(texts, desc="推理进度", unit="样本"):
         inference_time = measure_inference_time(text)
         times.append(inference_time)
 
+print(f"设备: {device}, 模型: {model_name}, 数据集: WikiText-2")
 avg_time = sum(times) / len(times)
 print(f"平均推理时间：{avg_time:.4f} 秒")
 log_inference_stats(sum(times), len(times))

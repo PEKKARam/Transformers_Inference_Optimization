@@ -16,9 +16,9 @@ atexit.register(finalize_s3)  # 确保程序退出时清理 S3 资源
 # 示例：使用 S3 文件系统
 s3 = S3FileSystem(region="us-west-2")
 
-# 加载 ptb 数据集
-dataset = load_dataset("ptb_text_only", split="test")
-texts = dataset["sentence"][:100]  # 选取前100条测试样本
+# 加载 WikiText-2 数据集
+dataset = load_dataset("bookcorpus", split="train")
+texts = dataset["text"][:100]  # 选取前100条测试样本
 
 # 初始化模型与分词器（在 CPU 上测试）
 model = GPT2LMHeadModel.from_pretrained(model_name).to(device)
@@ -44,7 +44,7 @@ for text in tqdm(texts, desc="推理进度", unit="样本"):
         inference_time = measure_inference_time(text)
         times.append(inference_time)
 
-print(f"设备: {device}, 模型: {model_name}, 数据集: PTB")
+print(f"设备: {device}, 模型: {model_name}, 数据集: BookCorpus")
 avg_time = sum(times) / len(times)
 print(f"平均推理时间：{avg_time:.4f} 秒")
 log_inference_stats(sum(times), len(times))
