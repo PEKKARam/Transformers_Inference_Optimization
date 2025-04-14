@@ -8,6 +8,8 @@ from tqdm import tqdm
 from utils import log_info, log_inference_stats  # 引入日志记录函数
 from config import model_name, device, max_length
 
+log_inference_stats(device, model_name, max_length)  # 记录模型和设备信息
+
 # 初始化 S3
 initialize_s3()
 atexit.register(finalize_s3)  # 确保程序退出时清理 S3 资源
